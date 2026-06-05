@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAVIGATION_ITEMS } from "@/constants/navigation";
-import { Home, Clock, CalendarDays } from "lucide-react";
+import {
+  Home,
+  Clock,
+  CalendarDays,
+  Settings,
+} from "lucide-react";
 import { useBreakpoint } from "@/hooks/ui/useBreakPoints";
 
 export function MobileBottomNav() {
@@ -14,10 +19,16 @@ export function MobileBottomNav() {
     switch (href) {
       case "/":
         return <Home size={20} strokeWidth={2.2} />;
+
       case "/hourly":
         return <Clock size={20} strokeWidth={2.2} />;
+
       case "/daily":
         return <CalendarDays size={20} strokeWidth={2.2} />;
+
+      case "/setting":
+        return <Settings size={20} strokeWidth={2.2} />;
+
       default:
         return <Home size={20} strokeWidth={2.2} />;
     }
@@ -35,6 +46,24 @@ export function MobileBottomNav() {
             key={item.href}
             href={item.href}
             className={`flex flex-col items-center gap-1.5 transition-colors duration-200 select-none ${
+              isActive
+                ? "text-[#1bf8c3]"
+                : "text-[#7c8ba1] active:text-white"
+            }`}
+          >
+            <div className="flex h-5 w-5 items-center justify-center">
+              {getIcon(item.href)}
+            </div>
+
+            <span className="text-[11px] font-semibold tracking-wide">
+              {item.label}
+            </span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}            className={`flex flex-col items-center gap-1.5 transition-colors duration-200 select-none ${
               isActive ? "text-[#1bf8c3]" : "text-[#7c8ba1] active:text-white"
             }`}
           >

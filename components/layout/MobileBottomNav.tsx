@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -42,37 +43,19 @@ export function MobileBottomNav() {
         const isActive = pathname === item.href;
 
         return (
-         <Link
-  key={item.href}
-  href={item.href}
-  className={`flex flex-col items-center gap-1.5 transition-colors duration-200 select-none ${
-    isActive
-      ? "text-[#1bf8c3]"
-      : "text-[#7c8ba1] active:text-white"
-  }`}
->
-  <div className="flex h-5 w-5 items-center justify-center">
-    {getIcon(item.href)}
-  </div>
-
-  <span className="text-[11px] font-semibold tracking-wide">
-    {item.label}
-  </span>
-</Link> 
-        );
-      })}
-    </nav>
-  );
-}            className={`flex flex-col items-center gap-1.5 transition-colors duration-200 select-none ${
-              isActive ? "text-[#1bf8c3]" : "text-[#7c8ba1] active:text-white"
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex flex-col items-center gap-1.5 transition-colors duration-200 select-none ${
+              isActive
+                ? "text-[#1bf8c3]"
+                : "text-[#7c8ba1] active:text-white"
             }`}
           >
-            {/* Icon Wrapper */}
             <div className="flex h-5 w-5 items-center justify-center">
               {getIcon(item.href)}
             </div>
 
-            {/* Label String */}
             <span className="text-[11px] font-semibold tracking-wide">
               {item.label}
             </span>

@@ -1,3 +1,7 @@
+"use client";
+
+import { useAppSelector } from "@/store/redux/hooks";
+import { RootState } from "@/store/redux/store";
 import { Card } from "@/components/ui/Card";
 
 interface Props {
@@ -5,6 +9,12 @@ interface Props {
 }
 
 export function VisibilityCard({ visibility }: Props) {
+  const units = useAppSelector((state: RootState) => state.preferences.units);
+  const isMetric = units === "metric";
+
+  const displayVisibility = isMetric ? visibility : Math.round(visibility * 0.621371);
+  const unitLabel = isMetric ? "km" : "mi";
+
   return (
     <Card className="flex flex-col justify-between">
       <div>
@@ -15,9 +25,9 @@ export function VisibilityCard({ visibility }: Props) {
 
         {/* Metric styled with tight tracking and pure white high-contrast display weights */}
         <h3 className="mt-2 text-4xl font-bold tracking-tight text-white md:text-5xl">
-          {visibility}
+          {displayVisibility}
           <span className="ml-1 text-lg font-semibold tracking-normal text-[#7c8ba1]/70">
-            km
+            {unitLabel}
           </span>
         </h3>
       </div>

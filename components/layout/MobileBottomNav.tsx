@@ -27,7 +27,7 @@ export function MobileBottomNav() {
       case "/daily":
         return <CalendarDays size={20} strokeWidth={2.2} />;
 
-      case "/setting":
+      case "/settings":
         return <Settings size={20} strokeWidth={2.2} />;
 
       default:

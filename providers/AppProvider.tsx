@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import QueryProvider from "./QueryProvider";
 import ReduxProvider from "./ReduxProvider";

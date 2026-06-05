@@ -4,11 +4,10 @@ import { useState } from "react";
 import { ERROR_PROFILES } from "@/config/errorProfiles";
 
 interface Props {
-  /** Error identifier used to extract visual configurations from your profile map */
   code?: keyof typeof ERROR_PROFILES | string;
-  /** Pass down raw runtime exception properties to expose deep diagnostic metrics */
+
   errorInstance?: Error;
-  /** Optional fallback reset trigger provided by Next.js or state orchestrators */
+
   resetAction?: () => void;
 }
 
@@ -19,10 +18,8 @@ export function CentralizedErrorPage({
 }: Props) {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
 
-  // Fall back gracefully if the provided code is not registered in our core config matrix
   const profile = ERROR_PROFILES[code as string] || ERROR_PROFILES.DEFAULT;
 
-  // Derive contextual accent color indicators safely based on severity ranks
   const severityStyles = {
     low: {
       border: "border-blue-500/20",
@@ -43,11 +40,9 @@ export function CentralizedErrorPage({
 
   return (
     <main className="flex min-h-[85vh] w-full items-center justify-center p-4 select-none sm:p-6 md:p-8">
-      {/* Outer Card Shell with dynamic border and glass backdrop layering */}
       <div
         className={`relative w-full max-w-xl rounded-2xl border ${severityStyles.border} bg-[#0c1220]/60 p-6 shadow-2xl backdrop-blur-md transition-all duration-300 md:p-10`}
       >
-        {/* Dynamic Background Flare Glow Accent */}
         <div
           className={`pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full opacity-10 blur-[60px] transition-colors duration-500 ${
             profile.severity === "critical"
@@ -58,9 +53,7 @@ export function CentralizedErrorPage({
           }`}
         />
 
-        {/* Header Block Array Layout */}
         <div className="flex flex-col items-center text-center">
-          {/* Dynamic Vector Icon Canvas Container */}
           <div
             className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${severityStyles.bg} ${severityStyles.text} shadow-inner`}
           >
@@ -131,12 +124,10 @@ export function CentralizedErrorPage({
             )}
           </div>
 
-          {/* Subtitle Utility Tag Badge */}
           <span className="inline-flex items-center rounded-full border border-[#13223f] bg-[#13223f]/50 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-[#7c8ba1] uppercase">
             {profile.subtitle}
           </span>
 
-          {/* Primary Text Headers */}
           <h1 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">
             {profile.title}
           </h1>
@@ -146,10 +137,8 @@ export function CentralizedErrorPage({
           </p>
         </div>
 
-        {/* Action Button Navigation Triggers */}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
           {resetAction ? (
-            /* Primary Retry Call-To-Action Button */
             <button
               onClick={() => resetAction()}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1bf8c3] to-[#12c499] px-5 py-3 text-xs font-extrabold tracking-wider text-slate-950 uppercase shadow-lg shadow-[#1bf8c3]/10 transition-all hover:brightness-110 active:scale-[0.98] sm:w-auto"
@@ -170,7 +159,6 @@ export function CentralizedErrorPage({
               Re-Establish Feed
             </button>
           ) : (
-            /* Alternate Home Redirect Button */
             <a
               href="/"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 px-5 py-3 text-xs font-extrabold tracking-wider text-slate-950 uppercase shadow-lg transition-all hover:brightness-110 active:scale-[0.98] sm:w-auto"
@@ -179,7 +167,6 @@ export function CentralizedErrorPage({
             </a>
           )}
 
-          {/* Dynamic Technical Diagnostic Dropdown Toggle */}
           {(errorInstance || code) && (
             <button
               onClick={() => setShowDiagnostics(!showDiagnostics)}
@@ -203,7 +190,6 @@ export function CentralizedErrorPage({
           )}
         </div>
 
-        {/* Dynamic Diagnostics Stack Trace Drawer Area */}
         {showDiagnostics && (
           <div className="mt-6 max-h-48 scrollbar-thin scrollbar-thumb-[#13223f] overflow-hidden overflow-y-auto rounded-xl border border-[#13223f]/40 bg-[#030914]/80 p-4 font-mono text-[11px] leading-relaxed text-[#7c8ba1]/90 shadow-inner">
             <div className="mb-2 flex flex-col gap-1 text-[#1bf8c3]/80">

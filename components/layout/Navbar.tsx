@@ -9,8 +9,6 @@ export function Navbar() {
   const { isMobile } = useBreakpoint();
   const scrollY = useScrollPosition();
 
-  // Mobile → render nothing
-
   return (
     <header
       className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
@@ -20,10 +18,8 @@ export function Navbar() {
       }`}
     >
       <div className="mx-auto flex h-20 max-w-[1280px] items-center justify-between px-6">
-        {/* Brand Lockup: Logo + App Name */}
         <Link href="/" className="flex items-center gap-2.5 select-none">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1bf8c3]/10 text-[#1bf8c3]">
-            {/* Lightning Bolt Icon */}
             <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
               <path d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -33,7 +29,6 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Navigation Links */}
         <nav className="flex items-center gap-8">
           {!isMobile &&
             NAVIGATION_ITEMS.map((item) => (

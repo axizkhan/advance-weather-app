@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { WeatherHero } from "@/components/weather/hero/WeatherHero";
@@ -30,6 +30,13 @@ const TemperatureChart = dynamic(
 );
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false);
+
+  // Hydration Shield: Ensure component waits for client to mount before evaluating dynamic cache
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Execute real-time atmospheric telemetry sync loop using the master hook
   const { isLoading, error, data } = useWeatherData();
 
@@ -49,8 +56,8 @@ export default function HomePage() {
     return futureHourly.slice(0, 24);
   }, [data?.hourly, data?.current?.time]);
 
-  // 1. Initial State: Handle splash view rendering during core telemetry load
-  if (isLoading) {
+  // 1. Initial State / Hydration Guard: Render splash view during SSR and core telemetry load
+  if (!mounted || isLoading) {
     return <SplashScreen />;
   }
 

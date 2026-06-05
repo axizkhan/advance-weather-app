@@ -5,6 +5,7 @@ import { useAppSelector, useAppDispatch } from "@/store/redux/hooks";
 import { setLocation } from "@/store/redux/slices/locationSlice";
 import { useGeoWeather } from "./useGeoWeather";
 import { useCurrentWeather } from "./useCurrentWeather";
+import { getBrowserLocation } from "@/service/geolocation/browserLocation";
 
 function shiftOfflineData(baseData: any, now: number) {
   if (!baseData) return baseData;
@@ -71,14 +72,41 @@ export function useWeatherData() {
   const { units, lang } = useAppSelector((state) => state.preferences);
   const location = useAppSelector((state) => state.location);
 
-  // 1. Fetch GeoWeather (auto-location via IP) if we don't have explicit coordinates
+  const [browserGeoFailed, setBrowserGeoFailed] = useState(false);
+
+  // 1. First Priority: Try to get exact GPS coordinates from the browser
+  useEffect(() => {
+    // Only attempt if we don't already have coordinates
+    if (!location.lat) {
+      getBrowserLocation()
+        .then((coords) => {
+          dispatch(
+            setLocation({
+              lat: coords.lat,
+              lon: coords.lon,
+              city: "", // We will get this from the forecast data
+              country: "",
+            }),
+          );
+        })
+        .catch((err) => {
+          console.warn(
+            "Browser Geolocation failed or denied, falling back to IP:",
+            err,
+          );
+          setBrowserGeoFailed(true);
+        });
+    }
+  }, [location.lat, dispatch]);
+
+  // 2. Fallback: Fetch GeoWeather (auto-location via IP) ONLY if browser GPS failed
   const geoQuery = useGeoWeather({
-    ip: "auto",
+    ip: browserGeoFailed && !location.lat ? "auto" : "",
     days: 7,
     ai: false,
   });
 
-  // 2. Sync auto-detected location into Redux if location is empty
+  // 3. Sync auto-detected IP location into Redux if browser GPS failed and IP succeeded
   useEffect(() => {
     if (!location.lat && geoQuery.data?.location) {
       dispatch(
@@ -126,8 +154,11 @@ export function useWeatherData() {
     location,
     units,
     lang,
-    // Provide a unified loading state
-    isLoading: (!activeLat && geoQuery.isLoading) || forecastQuery.isLoading,
+    // Provide a unified loading state (wait for browser GPS or fallback IP detection)
+    isLoading:
+      (!activeLat && !browserGeoFailed) ||
+      (!activeLat && geoQuery.isLoading) ||
+      forecastQuery.isLoading,
     error,
     // Fall back to geoQuery data if forecast hasn't resolved yet
     data: baseData

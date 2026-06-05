@@ -13,7 +13,10 @@ export const NAVIGATION_ITEMS = [
 
   {
     label: "Daily",
-
     href: "/daily",
+  },
+  {
+    label: "Settings",
+    href: "/settings",
   },
 ];

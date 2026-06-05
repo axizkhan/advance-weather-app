@@ -21,7 +21,16 @@ async function fetchGeoWeather({
     body: JSON.stringify({ ip, days, ai }),
   });
 
-  return reponse.json();
+  if (!reponse.ok) {
+    throw new Error(`API error: ${reponse.status}`);
+  }
+
+  const data = await reponse.json();
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export function useGeoWeather({

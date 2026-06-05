@@ -19,9 +19,9 @@ export function normalizeWeatherData(data: any): WeatherGeoResponse {
 
   return {
     location: {
-      city: data.ip_geo?.city ?? "",
-      region: data.ip_geo?.region ?? "",
-      country: data.ip_geo?.country ?? "",
+      city: data.location?.city || data.location?.name || data.ip_geo?.city || "",
+      region: data.location?.region || data.ip_geo?.region || "",
+      country: data.location?.country || data.ip_geo?.country || "",
       lat: data.location.lat,
       lon: data.location.lon,
       localtime: data.current.time,

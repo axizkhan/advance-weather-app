@@ -27,7 +27,16 @@ async function fetchCurrentWeather({
     body: JSON.stringify({ lat, lon, unit, lang, days, ai }),
   });
 
-  return reponse.json();
+  if (!reponse.ok) {
+    throw new Error(`API error: ${reponse.status}`);
+  }
+
+  const data = await reponse.json();
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export function useCurrentWeather({

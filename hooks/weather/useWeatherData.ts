@@ -1,13 +1,71 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/redux/hooks";
 import { setLocation } from "@/store/redux/slices/locationSlice";
 import { useGeoWeather } from "./useGeoWeather";
 import { useCurrentWeather } from "./useCurrentWeather";
 
+function shiftOfflineData(baseData: any, now: number) {
+  if (!baseData) return baseData;
+
+  // Deep clone to avoid mutating the React Query cache
+  const shiftedData = { ...baseData, current: { ...baseData.current } };
+
+  if (baseData.hourly && baseData.hourly.length > 0) {
+    // 1. Try to find the matching hour
+    const currentHourData = baseData.hourly.find((hour: any) => {
+      const hourTime = new Date(hour.time).getTime();
+      // Hour block is valid for 1 hour (3600000 ms)
+      return now >= hourTime && now < hourTime + 3600000;
+    });
+
+    if (currentHourData) {
+      shiftedData.current = {
+        ...shiftedData.current,
+        temperature: currentHourData.temperature,
+        humidity: currentHourData.humidity,
+        windSpeed: currentHourData.windSpeed,
+        conditionCode: currentHourData.conditionCode,
+        icon: currentHourData.icon,
+        uvIndex: currentHourData.uvIndex,
+        time: new Date(now),
+      };
+      return shiftedData;
+    }
+
+    // 2. If hourly array is exhausted (time has passed the last cached hour)
+    const lastHour = baseData.hourly[baseData.hourly.length - 1];
+    const lastHourTime = new Date(lastHour.time).getTime();
+    if (now > lastHourTime && baseData.daily && baseData.daily.length > 0) {
+      // Find matching daily data or default to the very last available day
+      const todayStr = new Date(now).toISOString().split("T")[0];
+      const currentDaily =
+        baseData.daily.find((day: any) => day.date.startsWith(todayStr)) ||
+        baseData.daily[baseData.daily.length - 1];
+
+      if (currentDaily) {
+        // Approximate temperature as the average of min and max
+        const avgTemp = (currentDaily.tempMin + currentDaily.tempMax) / 2;
+        shiftedData.current = {
+          ...shiftedData.current,
+          temperature: Math.round(avgTemp * 10) / 10,
+          windSpeed: currentDaily.windMax || shiftedData.current.windSpeed,
+          conditionCode: currentDaily.conditionCode,
+          icon: currentDaily.icon,
+          time: new Date(now),
+        };
+        return shiftedData;
+      }
+    }
+  }
+
+  return shiftedData;
+}
+
 export function useWeatherData() {
   const dispatch = useAppDispatch();
+  const [now, setNow] = useState(Date.now());
 
   // Extract user preferences and current location from Redux
   const { units, lang } = useAppSelector((state) => state.preferences);
@@ -27,7 +85,6 @@ export function useWeatherData() {
         setLocation({
           lat: geoQuery.data.location.lat,
           lon: geoQuery.data.location.lon,
-          // geoNormalizer returns city, but safeguard with name just in case
           city:
             (geoQuery.data.location as any).city ||
             (geoQuery.data.location as any).name,
@@ -49,7 +106,21 @@ export function useWeatherData() {
     days: 7,
   });
 
-  const baseData = forecastQuery.data || geoQuery.data;
+  const rawBaseData = forecastQuery.data || geoQuery.data;
+  const error = forecastQuery.error || geoQuery.error;
+  const isOffline = !!error && !!rawBaseData;
+
+  // 4. Force a re-render every minute to keep time-shifted data accurate when offline
+  useEffect(() => {
+    if (!isOffline) return;
+    const interval = setInterval(() => {
+      setNow(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [isOffline]);
+
+  // Apply offline interpolation to shift data to current time
+  const baseData = isOffline ? shiftOfflineData(rawBaseData, now) : rawBaseData;
 
   return {
     location,
@@ -57,7 +128,7 @@ export function useWeatherData() {
     lang,
     // Provide a unified loading state
     isLoading: (!activeLat && geoQuery.isLoading) || forecastQuery.isLoading,
-    error: forecastQuery.error || geoQuery.error,
+    error,
     // Fall back to geoQuery data if forecast hasn't resolved yet
     data: baseData
       ? {

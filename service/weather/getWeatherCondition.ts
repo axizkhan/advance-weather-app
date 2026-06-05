@@ -1,6 +1,6 @@
 import { ConditionCode, conditionCodes } from "./weatherCodition";
 
-export function getCondition(code: string) {
+export function getWeatherCondition(code: string) {
   return (
     conditionCodes[code as ConditionCode] ?? {
       label: "Unknown",

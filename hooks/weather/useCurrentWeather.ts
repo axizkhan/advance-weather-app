@@ -12,8 +12,8 @@ async function fetchCurrentWeather({
   days = 7,
   ai = false,
 }: {
-  lat: string;
-  lon: string;
+  lat: number;
+  lon: number;
   lang: string;
   unit: string;
   days: number;
@@ -38,15 +38,15 @@ export function useCurrentWeather({
   days = 7,
   ai = false,
 }: {
-  lat: string;
-  lon: string;
+  lat: number;
+  lon: number;
   lang?: string;
   unit?: string;
   days?: number;
   ai?: boolean;
 }) {
   return useQuery({
-    queryKey: queryKeys.weather.forecaste(lat, lon),
+    queryKey: queryKeys.weather.current(lat, lon),
     queryFn: () => fetchCurrentWeather({ lat, lon, lang, unit, days, ai }),
     enabled: !!lat && !!lon,
   });

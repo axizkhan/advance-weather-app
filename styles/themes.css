@@ -1,0 +1,33 @@
+:root {
+  --background: #020617;
+  --foreground: #f8fafc;
+  
+  --card: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.1);
+  
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  
+  --secondary: rgba(255, 255, 255, 0.1);
+  --secondary-hover: rgba(255, 255, 255, 0.15);
+
+  --muted: #64748b;
+  
+  --glass-blur: blur(18px);
+}
+
+.light {
+  --background: #f8fafc;
+  --foreground: #020617;
+  
+  --card: rgba(255, 255, 255, 0.7);
+  --border: rgba(0, 0, 0, 0.1);
+  
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  
+  --secondary: rgba(0, 0, 0, 0.05);
+  --secondary-hover: rgba(0, 0, 0, 0.1);
+
+  --muted: #94a3b8;
+}

@@ -16,6 +16,7 @@
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
   --color-muted: var(--muted);
+  --color-warning: var(--warning);
 }
 
 body {
@@ -23,4 +24,5 @@ body {
   color: var(--foreground);
   min-height: 100vh;
   overflow-x: hidden;
+  font-family: var(--font-sans);
 }

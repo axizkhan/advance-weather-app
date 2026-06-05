@@ -1,18 +1,54 @@
+"use client";
+
+import { useAppSelector } from "@/store/redux/hooks";
+import { RootState } from "@/store/redux/store";
 import { Card } from "@/components/ui/Card";
 import { WeatherIcon } from "../shared/WeatherIcon";
 
 interface Props {
-  item: any;
+  item: {
+    time: string | number | Date;
+    icon: string;
+    temp: number;
+  };
 }
 
 export function HourlyCard({ item }: Props) {
+  // Extract global unit format settings from your preferences slice
+  const units = useAppSelector((state: RootState) => state.preferences.units);
+  const isMetric = units === "metric";
+
+  // Calculate dynamic display value
+  const displayTemp = isMetric
+    ? Math.round(item.temp)
+    : Math.round((item.temp * 9) / 5 + 32);
+
+  // Format time into a clean 12-hour or 24-hour scannable string (e.g., "04:00 PM" or "16:00")
+  const formattedTime = new Date(item.time).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
   return (
-    <Card className="min-w-[110px] text-center">
-      <p className="text-sm">{new Date(item.time).getHours()}:00</p>
-      <div className="flex justify-center">
-        <WeatherIcon icon={item.icon} size={48} />
+    <Card className="flex min-w-[105px] flex-col items-center justify-between gap-3 p-4 text-center transition-all duration-200 select-none hover:border-[#13223f]/90 hover:bg-[#091225]/80">
+      {/* Time Segment Tracker */}
+      <p className="text-[11px] font-bold tracking-wider text-[#7c8ba1] uppercase">
+        {formattedTime}
+      </p>
+
+      {/* Weather Icon Frame Vector */}
+      <div className="flex h-12 w-12 items-center justify-center drop-shadow-[0_4px_8px_rgba(3,9,20,0.4)] transition-transform duration-300 hover:scale-110">
+        <WeatherIcon icon={item.icon} size={36} />
       </div>
-      <p className="text-2xl font-bold">{item.temp}°</p>
+
+      {/* Temperature Display Metric */}
+      <p className="text-xl font-extrabold tracking-tight text-white">
+        {displayTemp}
+        <span className="ml-0.5 text-sm font-semibold text-[#7c8ba1]/70">
+          °
+        </span>
+      </p>
     </Card>
   );
 }

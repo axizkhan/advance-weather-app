@@ -3,35 +3,43 @@
 import { motion } from "framer-motion";
 
 export function CloudsAnimation() {
-  const clouds = Array.from({ length: 8 });
+  // Explicit structural matrix to create organic variation in height, scale, and depth speed
+  const cloudProfiles = [
+    { y: "10%", scale: 1.0, opacity: 0.12, duration: 55, delay: 0 },
+    { y: "25%", scale: 1.4, opacity: 0.08, duration: 75, delay: -15 },
+    { y: "45%", scale: 0.8, opacity: 0.15, duration: 45, delay: -5 },
+    { y: "60%", scale: 1.8, opacity: 0.05, duration: 95, delay: -30 },
+    { y: "75%", scale: 1.1, opacity: 0.1, duration: 65, delay: -20 },
+    { y: "90%", scale: 1.5, opacity: 0.07, duration: 85, delay: -10 },
+  ];
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-gradient-to-b from-blue-300/40 to-blue-100/40 pointer-events-none">
-      {clouds.map((_, i) => (
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden mix-blend-screen select-none">
+      {cloudProfiles.map((cloud, index) => (
         <motion.div
-          key={i}
-          className="absolute top-10 h-20 w-40 rounded-full bg-white/70 blur-[2px]"
+          key={index}
+          className="absolute h-36 w-80 rounded-full bg-gradient-to-r from-white/20 via-white/10 to-transparent blur-[64px]"
+          style={{
+            top: cloud.y,
+            left: 0,
+          }}
           initial={{
-            x: "-30vw",
-            y: `${Math.random() * 40}%`,
-            scale: Math.random() * 1 + 0.5,
-            opacity: Math.random() * 0.5 + 0.3,
+            x: "-40vw",
+            scale: cloud.scale,
+            opacity: 0,
           }}
           animate={{
-            x: "120vw",
+            x: "130vw",
+            // Smoothly transitions opacity into view as it moves on screen, preventing clipping at boundaries
+            opacity: [0, cloud.opacity, cloud.opacity, 0],
           }}
           transition={{
-            duration: Math.random() * 40 + 60,
+            duration: cloud.duration,
+            delay: cloud.delay,
             repeat: Infinity,
             ease: "linear",
-            delay: Math.random() * -60, // Random negative delay to start on screen
           }}
-        >
-          {/* Cloud fluffy parts */}
-          <div className="absolute -top-6 left-6 h-16 w-16 rounded-full bg-white/70" />
-          <div className="absolute -top-10 left-16 h-20 w-20 rounded-full bg-white/70" />
-          <div className="absolute top-2 left-24 h-14 w-14 rounded-full bg-white/70" />
-        </motion.div>
+        />
       ))}
     </div>
   );

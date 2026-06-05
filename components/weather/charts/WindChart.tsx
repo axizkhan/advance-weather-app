@@ -7,8 +7,8 @@ interface Props {
   data: any[];
 }
 
-export function TemperatureChart({ data }: Props) {
-  // Unique ID generated for the SVG gradient mapping to avoid衝突 in multi-chart setups
+export function WindChart({ data }: Props) {
+  // Unique ID generated for the SVG gradient mapping to avoid conflicts in multi-chart setups
   const gradientId = useId();
 
   return (
@@ -19,10 +19,10 @@ export function TemperatureChart({ data }: Props) {
           margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
         >
           <defs>
-            {/* Custom linear gradient for premium dark-mode glow blending */}
+            {/* Custom linear gradient for the Solar Amber theme */}
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#1bf8c3" stopOpacity={0.25} />
-              <stop offset="95%" stopColor="#1bf8c3" stopOpacity={0.0} />
+              <stop offset="5%" stopColor="#fdb813" stopOpacity={0.25} />
+              <stop offset="95%" stopColor="#fdb813" stopOpacity={0.0} />
             </linearGradient>
           </defs>
 
@@ -53,18 +53,18 @@ export function TemperatureChart({ data }: Props) {
               marginBottom: "4px",
             }}
             itemStyle={{
-              color: "#1bf8c3",
+              color: "#fdb813",
               fontSize: "14px",
               fontWeight: 700,
             }}
-            formatter={(value: any) => [`${value}°C`, "Temperature"]}
+            formatter={(value: any) => [`${value} km/h`, "Wind Speed"]}
           />
 
           {/* High-fidelity Area Curve with custom gradient fill mapping */}
           <Area
             type="monotone"
-            dataKey="temp"
-            stroke="#1bf8c3"
+            dataKey="windSpeed"
+            stroke="#fdb813"
             strokeWidth={2.5}
             fillOpacity={1}
             fill={`url(#${gradientId})`}
@@ -73,7 +73,7 @@ export function TemperatureChart({ data }: Props) {
               r: 5,
               stroke: "#030914",
               strokeWidth: 2,
-              fill: "#1bf8c3",
+              fill: "#fdb813",
             }}
           />
         </AreaChart>

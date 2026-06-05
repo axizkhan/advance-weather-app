@@ -1,16 +1,22 @@
+"use client";
+
 import { HTMLAttributes } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/utils/cn";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {}
 
 export function GlassCard({ className, ...props }: Props) {
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -5, scale: 1.01 }}
+      transition={{ duration: 0.2 }}
       className={cn(
-        "rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl shadow-xl",
-        className
+        // High-fidelity frosted container mimicking the floating weather pills
+        "rounded-xl border border-[#13223f]/60 bg-[#091225]/40 p-4 text-white shadow-2xl backdrop-blur-md transition-all duration-200 hover:border-[#13223f]/90",
+        className,
       )}
-      {...props}
+      {...(props as any)}
     />
   );
 }

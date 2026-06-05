@@ -5,5 +5,13 @@ interface Props {
 }
 
 export function Skeleton({ className }: Props) {
-  return <div className={cn("animate-pulse rounded-2xl bg-white/10", className)} />;
+  return (
+    <div
+      className={cn(
+        // High-fidelity dark mode loading block matching the weather card profiles
+        "animate-pulse rounded-xl border border-[#13223f]/50 bg-[#091225]",
+        className,
+      )}
+    />
+  );
 }

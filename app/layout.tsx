@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppProvider from "@/providers/AppProvider";
 import { Navbar } from "@/components/layout/Navbar";
-import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { MainContainer } from "@/components/layout/MainContainer";
 
@@ -18,8 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Advanced Weather App",
-  description: "Modern immersive weather platform",
+  title: "WeatherAI | Advanced Immersive Telemetry Platform",
+  description:
+    "Real-time atmospheric analysis and situational environmental telemetry data.",
 };
 
 export default function RootLayout({
@@ -30,16 +30,29 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="relative min-h-full bg-[#030914] font-sans text-slate-100 selection:bg-[#1bf8c3]/30 selection:text-[#1bf8c3]">
+        {/* Global state container orchestration layer */}
         <AppProvider>
-          <Navbar />
-          <MainContainer>
-            <DesktopSidebar />
-            {children}
-          </MainContainer>
-          <MobileBottomNav />
+          <div className="relative flex min-h-screen flex-col justify-between overflow-x-hidden">
+            {/* Primary Desktop/Tablet Sticky Header Control */}
+            <Navbar />
+
+            {/* 
+              Central Display Pipeline:
+              MainContainer isolates child pages. When those pages wrap their grids in 
+              WeatherThemeWrapper, the gradient fills down this main window axis seamlessly.
+            */}
+            <MainContainer>{children}</MainContainer>
+
+            {/* Global Mobile Structural Foothold Space Cushion */}
+            <div className="h-16 w-full md:hidden" aria-hidden="true" />
+
+            {/* Floating Context-Aware Mobile Navigation Axis */}
+            <MobileBottomNav />
+          </div>
         </AppProvider>
       </body>
     </html>

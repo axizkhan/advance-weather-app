@@ -1,31 +1,80 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
+interface SnowFlake {
+  id: number;
+  left: string;
+  duration: number;
+  delay: number;
+  opacity: number;
+  size: number;
+  // Unique horizontal drift array offsets for custom swaying paths
+  swayRange: string[];
+}
+
 export function SnowAnimation() {
-  const flakes = Array.from({ length: 70 });
+  const [flakes, setFlakes] = useState<SnowFlake[]>([]);
+
+  useEffect(() => {
+    // Generate snowflake data models safely after the client engine mounts
+    const generatedFlakes = Array.from({ length: 45 }).map((_, index) => {
+      const initialLeft = Math.random() * 100;
+      // Define a localized oscillating boundary window so particles drift back and forth instead of running away
+      const driftOffset = 4 + Math.random() * 6;
+
+      return {
+        id: index,
+        left: `${initialLeft}%`,
+        duration: 7 + Math.random() * 6, // Slow, floating descent times
+        delay: Math.random() * -10, // Pre-warms the layout canvas instantly on load
+        opacity: 0.2 + Math.random() * 0.6,
+        size: 3 + Math.random() * 5, // Varied particle dimensions
+        swayRange: [
+          `${initialLeft}%`,
+          `${initialLeft + driftOffset}%`,
+          `${initialLeft - driftOffset}%`,
+          `${initialLeft}%`,
+        ],
+      };
+    });
+
+    setFlakes(generatedFlakes);
+  }, []);
+
+  if (flakes.length === 0) return null;
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-gradient-to-b from-slate-400/40 to-slate-200/40 pointer-events-none">
-      {flakes.map((_, i) => (
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden mix-blend-screen select-none">
+      {flakes.map((flake) => (
         <motion.div
-          key={i}
-          className="absolute top-0 h-2 w-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-          initial={{
-            x: `${Math.random() * 100}vw`,
-            y: -20,
-            opacity: Math.random() * 0.8 + 0.2,
-            scale: Math.random() * 0.8 + 0.4,
+          key={flake.id}
+          className="absolute rounded-full bg-white blur-[0.5px]"
+          style={{
+            height: `${flake.size}px`,
+            width: `${flake.size}px`,
+            opacity: flake.opacity,
+            left: 0, // Reset default left configuration to let the keyframe array handle positioning
           }}
+          initial={{ y: "-10vh" }}
           animate={{
-            y: "100vh",
-            x: `calc(${Math.random() * 100}vw + ${Math.random() * 100 - 50}px)`,
+            y: "110vh",
+            x: flake.swayRange, // Orchestrates organic side-to-side shifting
           }}
           transition={{
-            duration: Math.random() * 5 + 5,
-            repeat: Infinity,
-            ease: "linear",
-            delay: Math.random() * 5,
+            y: {
+              duration: flake.duration,
+              delay: flake.delay,
+              repeat: Infinity,
+              ease: "linear",
+            },
+            x: {
+              duration: flake.duration * 0.5, // Sway faster than the fall speed to look organic
+              delay: flake.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
           }}
         />
       ))}

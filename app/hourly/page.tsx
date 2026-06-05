@@ -6,23 +6,20 @@ import { HourlyForecast } from "@/components/weather/hourly/HourlyForecast";
 import { TemperatureChart } from "@/components/weather/charts/TemperatureChart";
 import { RainChart } from "@/components/weather/charts/RainChart";
 import { WindChart } from "@/components/weather/charts/WindChart";
+import { HumidityChart } from "@/components/weather/charts/HumidityChart";
 import { WeatherThemeWrapper } from "@/components/weather/shared/WeatherThemeWrapper";
 import { WeatherBackground } from "@/components/weather/shared/WeatherBackground";
 import { CentralizedErrorPage } from "@/components/shared/CentralizedErrorPage";
 import { SplashScreen } from "@/components/ui/SplashScreen";
-import { useGeoWeather } from "@/hooks/weather/useGeoWeather";
+import { useWeatherData } from "@/hooks/weather/useWeatherData";
 
-type AnalyticsTab = "temperature" | "precipitation" | "wind";
+type AnalyticsTab = "temperature" | "precipitation" | "wind" | "humidity";
 
 export default function HourlyPage() {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>("temperature");
 
   // Synchronize 24-hour high-density telemetry stream
-  const { isLoading, error, data } = useGeoWeather({
-    days: 1,
-    ai: false,
-    ip: "auto",
-  });
+  const { isLoading, error, data } = useWeatherData();
 
   // 1. Initial State: Handle full-screen splash layer during layout loading
   if (isLoading) {
@@ -40,7 +37,15 @@ export default function HourlyPage() {
   }
 
   const weatherCode = data.current?.condition?.code;
-  const hourlyData = data.hourly;
+
+  // Filter hourly to start from the NEXT hour relative to current time, limited to 24 hours
+  const currentTime = data.current?.time
+    ? new Date(data.current.time).getTime()
+    : Date.now();
+  const futureHourly =
+    data.hourly?.filter(
+      (hour: any) => new Date(hour.time).getTime() > currentTime,
+    ) || [];
 
   return (
     <WeatherThemeWrapper weatherCode={weatherCode}>
@@ -63,7 +68,7 @@ export default function HourlyPage() {
           </div>
 
           {/* Virtualized Horizontal Timeline Track */}
-          <HourlyForecast data={hourlyData} />
+          <HourlyForecast data={futureHourly} />
 
           {/* Analytics Engine Panel Suite */}
           <section className="rounded-xl border border-[#13223f]/40 bg-[#091225]/20 p-5 backdrop-blur-sm">
@@ -79,7 +84,7 @@ export default function HourlyPage() {
               {/* High-Density Segmented Controls */}
               <div className="flex self-start rounded-lg border border-[#13223f]/40 bg-[#030914]/60 p-1 sm:self-auto">
                 {(
-                  ["temperature", "precipitation", "wind"] as AnalyticsTab[]
+                  ["temperature", "precipitation", "wind", "humidity"] as AnalyticsTab[]
                 ).map((tab) => (
                   <button
                     key={tab}
@@ -99,10 +104,13 @@ export default function HourlyPage() {
             {/* Dynamic Rendering Window based on Active State Vector */}
             <div className="flex min-h-[300px] flex-col justify-center rounded-xl border border-[#13223f]/10 bg-[#030914]/20 p-2 sm:p-4">
               {activeTab === "temperature" && (
-                <TemperatureChart data={hourlyData} />
+                <TemperatureChart data={futureHourly} />
               )}
-              {activeTab === "precipitation" && <RainChart data={hourlyData} />}
-              {activeTab === "wind" && <WindChart data={hourlyData} />}
+              {activeTab === "precipitation" && (
+                <RainChart data={futureHourly} />
+              )}
+              {activeTab === "wind" && <WindChart data={futureHourly} />}
+              {activeTab === "humidity" && <HumidityChart data={futureHourly} />}
             </div>
           </section>
         </div>

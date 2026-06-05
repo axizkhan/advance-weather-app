@@ -10,10 +10,17 @@ export async function getDb() {
   }
 
   if (!dbPromise) {
-    dbPromise = openDB("advanced-weather-db", 1, {
+    dbPromise = openDB("advanced-weather-db", 2, {
       upgrade(db) {
-        if (!db.objectStoreNames.contains("cache"))
+        if (!db.objectStoreNames.contains("cache")) {
           db.createObjectStore("cache");
+        }
+        if (!db.objectStoreNames.contains("cities")) {
+          db.createObjectStore("cities", { keyPath: "id" });
+        }
+        if (!db.objectStoreNames.contains("preferences")) {
+          db.createObjectStore("preferences");
+        }
       },
     });
   }

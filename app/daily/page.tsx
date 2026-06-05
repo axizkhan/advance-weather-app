@@ -3,19 +3,16 @@
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { DailyPreview } from "@/components/weather/daily/DailyPreview";
 import { SunriseSunset } from "@/components/weather/daily/SunriseSunset";
+import { HumidityChart } from "@/components/weather/charts/HumidityChart";
 import { WeatherThemeWrapper } from "@/components/weather/shared/WeatherThemeWrapper";
 import { WeatherBackground } from "@/components/weather/shared/WeatherBackground";
 import { CentralizedErrorPage } from "@/components/shared/CentralizedErrorPage";
-import { useGeoWeather } from "@/hooks/weather/useGeoWeather";
+import { useWeatherData } from "@/hooks/weather/useWeatherData";
 import { SplashScreen } from "@/components/ui/SplashScreen";
 
 export default function DailyPage() {
   // Synchronize 7-day synoptic forecast metrics
-  const { isLoading, error, data } = useGeoWeather({
-    days: 7,
-    ai: false,
-    ip: "auto",
-  });
+  const { isLoading, error, data } = useWeatherData();
 
   // 1. Initial State: Handle full-screen splash layout during stream compilation
   if (isLoading) {
@@ -34,6 +31,32 @@ export default function DailyPage() {
 
   const weatherCode = data.current?.condition?.code;
   const currentDayMetrics = data.daily[0];
+
+  // Calculate daily average humidity from hourly data
+  const dailyHumidityData = data.daily.map((day: any, dayIndex: number) => {
+    const dayStart = new Date(day.date).getTime();
+    const dayEnd = dayStart + 24 * 60 * 60 * 1000;
+
+    // Filter hourly data for this day
+    const dayHourly = data.hourly?.filter((hour: any) => {
+      const hourTime = new Date(hour.time).getTime();
+      return hourTime >= dayStart && hourTime < dayEnd;
+    }) || [];
+
+    // Calculate average humidity for the day
+    const avgHumidity =
+      dayHourly.length > 0
+        ? Math.round(
+            dayHourly.reduce((sum: number, h: any) => sum + (h.humidity || 0), 0) /
+              dayHourly.length,
+          )
+        : 0;
+
+    return {
+      time: day.date,
+      humidity: avgHumidity,
+    };
+  });
 
   return (
     <WeatherThemeWrapper weatherCode={weatherCode}>
@@ -55,16 +78,26 @@ export default function DailyPage() {
             </p>
           </div>
 
-          {/* Main Informational Layout Split Grid */}
-          <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
-            {/* Left/Center Matrix Area: Long-Range 7-Day Element Stack */}
-            <div className="lg:col-span-2">
+          {/* Main Informational Layout Split Grid 
+            CHANGED: Added 'grid-cols-1' to explicitly declare mobile stack tracking bounds.
+          */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+            {/* Left/Center Matrix Area: Long-Range 7-Day Element Stack 
+                CHANGED: Added 'order-2 lg:order-1' 
+                This forces the 7-day view to drop down to the second position on mobile screen viewports,
+                but snaps back into the primary layout position on large windows.
+            */}
+            <div className="order-2 lg:order-1 lg:col-span-2">
               <DailyPreview data={data.daily} />
             </div>
 
-            {/* Right Matrix Area: Real-Time Solar Coordinates */}
+            {/* Right Matrix Area: Real-Time Solar Coordinates 
+                CHANGED: Added 'order-1 lg:order-2'
+                This forces your Sunrise/Sunset card to rise to the top layout slot on mobile windows,
+                while locking securely inside your right-hand siderail column on desktops.
+            */}
             {currentDayMetrics && (
-              <div className="h-full">
+              <div className="order-1 lg:order-2 h-full">
                 <SunriseSunset
                   sunrise={currentDayMetrics.sunrise}
                   sunset={currentDayMetrics.sunset}
@@ -72,6 +105,19 @@ export default function DailyPage() {
               </div>
             )}
           </div>
+
+          {/* Humidity Analytics Panel: 7-Day Average Trend Visualization */}
+          {dailyHumidityData.length > 0 && (
+            <section className="rounded-xl border border-[#13223f]/40 bg-[#091225]/20 p-5 backdrop-blur-sm">
+              <div className="mb-5 flex items-center gap-2">
+                <span className="h-3 w-1 rounded-full bg-[#1bf8c3]" />
+                <h2 className="text-sm font-bold tracking-[0.06em] text-white uppercase">
+                  7-Day Humidity Trend
+                </h2>
+              </div>
+              <HumidityChart data={dailyHumidityData} />
+            </section>
+          )}
         </div>
       </PageWrapper>
     </WeatherThemeWrapper>

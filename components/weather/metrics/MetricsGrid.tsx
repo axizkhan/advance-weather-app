@@ -6,14 +6,7 @@ import { UVCard } from "../current/UVCard";
 import { VisibilityCard } from "../current/VisibilityCard";
 
 interface Props {
-  data: {
-    current: {
-      humidity: number;
-      windSpeed: number;
-      uv: number;
-      visibility: number;
-    };
-  };
+  data: any;
 }
 
 export function MetricsGrid({ data }: Props) {
@@ -41,10 +34,10 @@ export function MetricsGrid({ data }: Props) {
       {hasTelemetry ? (
         /* Responsive High-Density Geometry Grid Matrix */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <HumidityCard humidity={data.current.humidity} />
-          <WindCard speed={data.current.windSpeed} />
-          <UVCard uv={data.current.uv} />
-          <VisibilityCard visibility={data.current.visibility} />
+          <HumidityCard humidity={data.current.humidity ?? 0} />
+          <WindCard speed={data.current.windSpeed ?? 0} />
+          <UVCard uv={data.current.uvIndex ?? 0} />
+          <VisibilityCard visibility={data.current.visibility ?? 10} />
         </div>
       ) : (
         /* Clean fallback state container to preserve dashboard alignment metrics during async streams */

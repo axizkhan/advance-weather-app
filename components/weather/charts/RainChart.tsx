@@ -22,6 +22,10 @@ export function RainChart({ data }: Props) {
             tickLine={false}
             axisLine={false}
             dy={10}
+            tickFormatter={(value) => {
+              if (!value) return "";
+              return new Date(value).toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
+            }}
           />
 
           {/* Custom Tooltip mimicking dark dashboard panels */}
@@ -46,12 +50,16 @@ export function RainChart({ data }: Props) {
               fontSize: "14px",
               fontWeight: 700,
             }}
+            labelFormatter={(label) => {
+              if (!label) return "";
+              return new Date(label).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+            }}
             formatter={(value: any) => [`${value}%`, "Precipitation"]}
           />
 
           {/* Premium UI Data Bar Configuration */}
           <Bar
-            dataKey="rainChance"
+            dataKey="precipitationProbability"
             fill="#1bf8c3"
             radius={[4, 4, 0, 0]}
             maxBarSize={32}

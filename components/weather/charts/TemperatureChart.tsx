@@ -34,6 +34,13 @@ export function TemperatureChart({ data }: Props) {
             tickLine={false}
             axisLine={false}
             dy={10}
+            tickFormatter={(value) => {
+              if (!value) return "";
+              return new Date(value).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                hour12: true,
+              });
+            }}
           />
 
           {/* Custom Tooltip mimicking dark dashboard panels */}
@@ -57,13 +64,21 @@ export function TemperatureChart({ data }: Props) {
               fontSize: "14px",
               fontWeight: 700,
             }}
-            formatter={(value: any) => [`${value}°C`, "Temperature"]}
+            labelFormatter={(label) => {
+              if (!label) return "";
+              return new Date(label).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              });
+            }}
+            formatter={(value: any) => [`${Math.round(value)}°`, "Temperature"]}
           />
 
           {/* High-fidelity Area Curve with custom gradient fill mapping */}
           <Area
             type="monotone"
-            dataKey="temp"
+            dataKey="temperature"
             stroke="#1bf8c3"
             strokeWidth={2.5}
             fillOpacity={1}

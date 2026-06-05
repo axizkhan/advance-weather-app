@@ -36,6 +36,6 @@ export function useGeoWeather({
   return useQuery({
     queryKey: queryKeys.geo.auto(),
     queryFn: () => fetchGeoWeather({ ip, days, ai }),
-    enabled: !!ip && !!days && !!ai,
+    enabled: !!ip && !!days,
   });
 }

@@ -16,21 +16,18 @@ export function WeatherIcon({
   const [imgSrc, setImgSrc] = useState<string>("");
   const [hasError, setHasError] = useState<boolean>(false);
 
-  // Parse and normalize incoming telemetry string coordinates safely
   useEffect(() => {
     if (!icon) {
       setHasError(true);
       return;
     }
 
-    // Ensure protocol absolute boundaries are intact
     const normalizedUrl = icon.startsWith("http") ? icon : `https:${icon}`;
     setImgSrc(normalizedUrl);
     setHasError(false);
   }, [icon]);
 
   if (hasError) {
-    /* High-fidelity fallback asset placeholder if the data stream fails or breaks */
     return (
       <div
         className="flex animate-pulse items-center justify-center rounded-full border border-[#13223f]/60 bg-[#13223f]/30 text-[#7c8ba1]"
@@ -56,16 +53,19 @@ export function WeatherIcon({
       className="relative flex items-center justify-center select-none"
       style={{ width: size, height: size }}
     >
-      {/* Underlying layout drop shadow ring layer to push icons out from the dark dashboard backdrop */}
-      <div className="absolute inset-0 scale-75 rounded-full opacity-20 bg-blend-screen blur-md" />
+      {/* 1. UPGRADED GLOW CORE:
+        Swapped out the empty backdrop layer for a vibrant white-blue radial glow ring 
+        to add extra pop and separate the icon asset from the dark layout.
+      */}
+      <div className="pointer-events-none absolute inset-0 scale-90 rounded-full bg-blue-400/10 blur-xl" />
 
       <img
-        src={imgSrc}
+        src={imgSrc || undefined}
         alt={alt}
         width={size}
         height={size}
         onError={() => setHasError(true)}
-        className="relative z-10 h-full w-full object-contain drop-shadow-[0_4px_6px_rgba(3,9,20,0.5)] filter transition-transform duration-300 group-hover:scale-105"
+        className="/* 2. THE GRAPHIC RESOLUTION MATRIX: - flips dark pixels to bright white. - ensures any muddy grey midtones turn crisp and luminous. */ relative z-10 h-full w-full object-contain brightness-200 brightness-[2] contrast-[1.1] drop-shadow-[0_4px_12px_rgba(27,248,195,0.15)] invert-100 invert-[0.85] filter transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
         draggable={false}
       />

@@ -8,70 +8,48 @@ import { DailyPreview } from "@/components/weather/daily/DailyPreview";
 import { TemperatureChart } from "@/components/weather/charts/TemperatureChart";
 import { WeatherThemeWrapper } from "@/components/weather/shared/WeatherThemeWrapper";
 import { WeatherBackground } from "@/components/weather/shared/WeatherBackground";
-import { useGeoWeather } from "@/hooks/weather/useGeoWeather";
+import { useWeatherData } from "@/hooks/weather/useWeatherData";
 import { SplashScreen } from "@/components/ui/SplashScreen";
+import { CentralizedErrorPage } from "@/components/shared/CentralizedErrorPage";
 
 export default function HomePage() {
-  // Execute real-time atmospheric telemetry sync loop
-  const { isLoading, error, data } = useGeoWeather({
-    days: 7,
-    ai: false,
-    ip: "auto",
-  });
+  // Execute real-time atmospheric telemetry sync loop using the master hook
+  const { isLoading, error, data } = useWeatherData();
 
   // 1. Initial State: Handle splash view rendering during core telemetry load
   if (isLoading) {
     return <SplashScreen />;
   }
 
-  // 2. Exception State: Handle backend connectivity or API handshake failure safely
-  if (error) {
-    return (
-      <main className="flex min-h-[60vh] items-center justify-center p-6 select-none">
-        <div className="w-full max-w-md rounded-xl border border-red-500/30 bg-[#0c0507] p-6 text-center shadow-lg">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-          <h2 className="text-sm font-bold tracking-wider text-red-200 uppercase">
-            Telemetry Error
-          </h2>
-          <p className="mt-2 text-xs leading-relaxed font-medium text-red-400/80">
-            {error.message ||
-              "Failed to establish a handshake with local ground weather stations."}
-          </p>
-        </div>
-      </main>
-    );
+  // 1. Loading and NO cached data → Show splash
+  if (isLoading && !data) {
+    return <SplashScreen />;
   }
 
-  // 3. Fallback Empty State: Re-verifies data warmth before committing layout layers to DOM
-  if (!data) {
-    return (
-      <main className="flex min-h-[60vh] items-center justify-center p-6 select-none">
-        <div className="w-full max-w-md rounded-xl border border-[#13223f]/60 bg-[#030914]/60 p-6 text-center">
-          <p className="text-xs font-bold tracking-widest text-[#7c8ba1] uppercase">
-            No Station Data Available
-          </p>
-        </div>
-      </main>
-    );
+  // 2. No data even from cache and an error occurred → Show offline state
+  if (error && (!data || !data.hourly)) {
+    return <CentralizedErrorPage code="OFFLINE" errorInstance={error} />;
+  }
+
+  // 3. No data even from cache → Show not found
+  if (!data || !data.hourly) {
+    return <CentralizedErrorPage code="NOT_FOUND" />;
   }
 
   // Extract explicit WMO code strings or numbers from current weather frame coordinates
   const weatherCode = data.current?.condition?.code;
 
+  // Filter hourly to start from the NEXT hour relative to current time, limited to 24 hours
+  const currentTime = data.current?.time
+    ? new Date(data.current.time).getTime()
+    : Date.now();
+  const futureHourly =
+    data.hourly?.filter(
+      (hour: any) => new Date(hour.time).getTime() > currentTime,
+    ) || [];
+  const homeHourly = futureHourly.slice(0, 24);
+
+  console.log(data);
   return (
     <WeatherThemeWrapper weatherCode={weatherCode}>
       <WeatherBackground />
@@ -82,17 +60,19 @@ export default function HomePage() {
 
           <MetricsGrid data={data} />
 
-          {data.hourly && (
-            <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+          {homeHourly.length > 0 && (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+              {/* Left/Center Area: Takes up 2 full columns on desktop, full-width on mobile */}
               <div className="lg:col-span-2">
-                <HourlyPreview data={data.hourly} />
+                <HourlyPreview data={homeHourly} />
               </div>
-              <div className="h-full">
-                <TemperatureChart data={data.hourly} />
+
+              {/* Right Area: Placed alongside on desktop, stacks perfectly underneath on mobile */}
+              <div className="w-full">
+                <TemperatureChart data={homeHourly} />
               </div>
             </div>
           )}
-
           {/* Extended Synoptic Forecast Grid Area */}
           {data.daily && <DailyPreview data={data.daily} />}
         </div>

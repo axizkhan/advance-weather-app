@@ -5,6 +5,7 @@ import AppProvider from "@/providers/AppProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { MainContainer } from "@/components/layout/MainContainer";
+import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,23 +37,25 @@ export default function RootLayout({
       <body className="relative min-h-full bg-[#030914] font-sans text-slate-100 selection:bg-[#1bf8c3]/30 selection:text-[#1bf8c3]">
         {/* Global state container orchestration layer */}
         <AppProvider>
-          <div className="relative flex min-h-screen flex-col justify-between overflow-x-hidden">
-            {/* Primary Desktop/Tablet Sticky Header Control */}
-            <Navbar />
+          <LayoutWrapper>
+            <div className="relative flex min-h-screen flex-col justify-between overflow-x-hidden">
+              {/* Primary Desktop/Tablet Sticky Header Control */}
+              <Navbar />
 
-            {/* 
-              Central Display Pipeline:
-              MainContainer isolates child pages. When those pages wrap their grids in 
-              WeatherThemeWrapper, the gradient fills down this main window axis seamlessly.
-            */}
-            <MainContainer>{children}</MainContainer>
+              {/* 
+                Central Display Pipeline:
+                MainContainer isolates child pages. When those pages wrap their grids in 
+                WeatherThemeWrapper, the gradient fills down this main window axis seamlessly.
+              */}
+              <MainContainer>{children}</MainContainer>
 
-            {/* Global Mobile Structural Foothold Space Cushion */}
-            <div className="h-16 w-full md:hidden" aria-hidden="true" />
+              {/* Global Mobile Structural Foothold Space Cushion */}
+              <div className="h-16 w-full md:hidden" aria-hidden="true" />
 
-            {/* Floating Context-Aware Mobile Navigation Axis */}
-            <MobileBottomNav />
-          </div>
+              {/* Floating Context-Aware Mobile Navigation Axis */}
+              <MobileBottomNav />
+            </div>
+          </LayoutWrapper>
         </AppProvider>
       </body>
     </html>

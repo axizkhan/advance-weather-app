@@ -23,14 +23,14 @@ export function HourlyPreview({ data }: Props) {
 
         {/* High-density layout tracking metadata */}
         <span className="text-[10px] font-semibold tracking-[0.08em] text-[#7c8ba1]/60 uppercase">
-          12-Hour Horizon
+          24-Hour Horizon
         </span>
       </div>
 
       {hasData ? (
         /* Native horizontal layout track with ultra-smooth scroll configuration */
         <div className="flex snap-x snap-mandatory scrollbar-thin scrollbar-thumb-[#13223f] scrollbar-track-transparent gap-3 overflow-x-auto rounded-xl border border-[#13223f]/20 bg-[#030914]/30 p-3 pb-4">
-          {data.slice(0, 12).map((item, index) => (
+          {data.map((item, index) => (
             <div key={item.id || item.time || index} className="snap-center">
               <HourlyCard item={item} />
             </div>

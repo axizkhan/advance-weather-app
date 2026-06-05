@@ -2,21 +2,36 @@
 
 import { Card } from "@/components/ui/Card";
 import { WeatherIcon } from "../shared/WeatherIcon";
+import { getWeatherType } from "@/services/weather/weatherMapper";
+import { useAppSelector } from "@/store/redux/hooks";
+import { RootState } from "@/store/redux/store";
 
 interface Props {
   item: {
     date: string | number | Date;
-    condition: string;
+    conditionCode: number;
     icon: string;
-    maxTemp: number;
-    minTemp: number;
+    tempMax: number;
+    tempMin: number;
   };
 }
 
 export function DailyForecastCard({ item }: Props) {
+  const units = useAppSelector((state: RootState) => state.preferences.units);
+  const isMetric = units === "metric";
+
   const dayName = new Date(item.date).toLocaleDateString("en-US", {
     weekday: "long",
   });
+
+  const weatherKey = getWeatherType(item.conditionCode || 1000);
+  const conditionText =
+    weatherKey.charAt(0).toUpperCase() + weatherKey.slice(1);
+
+  const avgTempRaw = (item.tempMax + item.tempMin) / 2;
+  const displayTemp = isMetric
+    ? Math.round(avgTempRaw)
+    : Math.round((avgTempRaw * 9) / 5 + 32);
 
   return (
     <Card className="flex items-center justify-between p-4 transition-all duration-200 hover:border-[#13223f]/90 hover:bg-[#091225]/80">
@@ -25,7 +40,7 @@ export function DailyForecastCard({ item }: Props) {
         <p className="text-sm font-semibold tracking-wide text-white">
           {dayName}
         </p>
-        <p className="text-xs font-medium text-[#7c8ba1]">{item.condition}</p>
+        <p className="text-xs font-medium text-[#7c8ba1]">{conditionText}</p>
       </div>
 
       {/* Right: Weather Icon & Temperature Range Grid */}
@@ -38,10 +53,7 @@ export function DailyForecastCard({ item }: Props) {
         {/* High-density thermal typography alignment */}
         <div className="flex min-w-[70px] items-baseline justify-end gap-2.5 text-right">
           <span className="text-base font-bold tracking-tight text-white">
-            {Math.round(item.maxTemp)}°
-          </span>
-          <span className="text-xs font-semibold tracking-tight text-[#7c8ba1]/60">
-            {Math.round(item.minTemp)}°
+            {displayTemp}°
           </span>
         </div>
       </div>

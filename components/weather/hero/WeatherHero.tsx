@@ -7,24 +7,25 @@ import { WeatherLocation } from "./WeatherLocation";
 import { FeelsLike } from "./FeelsLike";
 import { WeatherIcon } from "../shared/WeatherIcon";
 
+import { getWeatherType } from "@/services/weather/weatherMapper";
+
 interface Props {
-  data: {
-    location: {
-      name: string;
-      country: string;
-    };
-    current: {
-      temperature: number;
-      feelsLike: number;
-      condition: {
-        text: string;
-        icon: string;
-      };
-    };
-  };
+  data: any;
 }
 
 export function WeatherHero({ data }: Props) {
+  const city = data.location?.city || data.location?.name || "Unknown Location";
+  const country = data.location?.country || "";
+  const temperature = data.current?.temperature || 0;
+  const feelsLike = data.hourly?.[0]?.feelsLike ?? temperature;
+  const conditionCode = data.current?.conditionCode || 1000;
+  const icon = data.current?.icon || "";
+
+  // Convert WMO code to human-readable string
+  const weatherKey = getWeatherType(conditionCode);
+  const conditionText =
+    weatherKey.charAt(0).toUpperCase() + weatherKey.slice(1);
+
   return (
     <GlassCard className="relative overflow-hidden border border-[#13223f]/60 bg-[#091225]/40 p-6 shadow-xl backdrop-blur-md sm:p-8 md:p-10">
       {/* Decorative localized ambient glow background matrix */}
@@ -35,19 +36,16 @@ export function WeatherHero({ data }: Props) {
       <div className="relative z-10 flex flex-col justify-between gap-8 md:flex-row md:items-center">
         {/* Left Stack: Telemetry Strings & Aggregates */}
         <div className="flex flex-col items-start space-y-3.5 md:space-y-4">
-          <WeatherLocation
-            city={data.location.name}
-            country={data.location.country}
-          />
+          <WeatherLocation city={city} country={country} />
 
           <div className="my-1">
-            <CurrentTemperature temperature={data.current.temperature} />
+            <CurrentTemperature temperature={temperature} />
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <WeatherCondition condition={data.current.condition.text} />
+            <WeatherCondition condition={conditionText} />
             <span className="hidden h-3 w-px bg-[#13223f] sm:block" />
-            <FeelsLike value={data.current.feelsLike} />
+            <FeelsLike value={feelsLike} />
           </div>
         </div>
 
@@ -57,11 +55,7 @@ export function WeatherHero({ data }: Props) {
             {/* Soft backdrop glow layer backing the weather icon */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#1bf8c3]/5 to-transparent opacity-60 mix-blend-screen" />
 
-            <WeatherIcon
-              icon={data.current.condition.icon}
-              alt={data.current.condition.text}
-              size={110}
-            />
+            <WeatherIcon icon={icon} alt={conditionText} size={110} />
           </div>
         </div>
       </div>

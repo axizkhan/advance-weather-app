@@ -2,10 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 interface PreferencesState {
   units: "metric" | "imperial";
+  lang: string;
 }
 
 const initialState: PreferencesState = {
   units: "metric",
+  lang: "en",
 };
 
 const preferencesSlice = createSlice({
@@ -17,9 +19,12 @@ const preferencesSlice = createSlice({
     setUnit: (state, action) => {
       state.units = action.payload;
     },
+    setLang: (state, action) => {
+      state.lang = action.payload;
+    },
   },
 });
 
-export const { setUnit } = preferencesSlice.actions;
+export const { setUnit, setLang } = preferencesSlice.actions;
 
 export default preferencesSlice.reducer;

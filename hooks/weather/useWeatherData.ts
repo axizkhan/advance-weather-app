@@ -91,7 +91,7 @@ export function useWeatherData() {
   }, [location.lat, dispatch]);
 
   const geoQuery = useGeoWeather({
-    ip: browserGeoFailed && !location.lat ? "auto" : "",
+    ip: "auto",
     days: 7,
     ai: false,
   });

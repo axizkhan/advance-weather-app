@@ -10,14 +10,11 @@ import { getBrowserLocation } from "@/service/geolocation/browserLocation";
 function shiftOfflineData(baseData: any, now: number) {
   if (!baseData) return baseData;
 
-  // Deep clone to avoid mutating the React Query cache
   const shiftedData = { ...baseData, current: { ...baseData.current } };
 
   if (baseData.hourly && baseData.hourly.length > 0) {
-    // 1. Try to find the matching hour
     const currentHourData = baseData.hourly.find((hour: any) => {
       const hourTime = new Date(hour.time).getTime();
-      // Hour block is valid for 1 hour (3600000 ms)
       return now >= hourTime && now < hourTime + 3600000;
     });
 
@@ -35,18 +32,15 @@ function shiftOfflineData(baseData: any, now: number) {
       return shiftedData;
     }
 
-    // 2. If hourly array is exhausted (time has passed the last cached hour)
     const lastHour = baseData.hourly[baseData.hourly.length - 1];
     const lastHourTime = new Date(lastHour.time).getTime();
     if (now > lastHourTime && baseData.daily && baseData.daily.length > 0) {
-      // Find matching daily data or default to the very last available day
       const todayStr = new Date(now).toISOString().split("T")[0];
       const currentDaily =
         baseData.daily.find((day: any) => day.date.startsWith(todayStr)) ||
         baseData.daily[baseData.daily.length - 1];
 
       if (currentDaily) {
-        // Approximate temperature as the average of min and max
         const avgTemp = (currentDaily.tempMin + currentDaily.tempMax) / 2;
         shiftedData.current = {
           ...shiftedData.current,
@@ -68,15 +62,12 @@ export function useWeatherData() {
   const dispatch = useAppDispatch();
   const [now, setNow] = useState(Date.now());
 
-  // Extract user preferences and current location from Redux
   const { units, lang } = useAppSelector((state) => state.preferences);
   const location = useAppSelector((state) => state.location);
 
   const [browserGeoFailed, setBrowserGeoFailed] = useState(false);
 
-  // 1. First Priority: Try to get exact GPS coordinates from the browser
   useEffect(() => {
-    // Only attempt if we don't already have coordinates
     if (!location.lat) {
       getBrowserLocation()
         .then((coords) => {
@@ -84,7 +75,7 @@ export function useWeatherData() {
             setLocation({
               lat: coords.lat,
               lon: coords.lon,
-              city: "", // We will get this from the forecast data
+              city: "",
               country: "",
             }),
           );
@@ -99,14 +90,12 @@ export function useWeatherData() {
     }
   }, [location.lat, dispatch]);
 
-  // 2. Fallback: Fetch GeoWeather (auto-location via IP) ONLY if browser GPS failed
   const geoQuery = useGeoWeather({
     ip: browserGeoFailed && !location.lat ? "auto" : "",
     days: 7,
     ai: false,
   });
 
-  // 3. Sync auto-detected IP location into Redux if browser GPS failed and IP succeeded
   useEffect(() => {
     if (!location.lat && geoQuery.data?.location) {
       dispatch(
@@ -122,7 +111,6 @@ export function useWeatherData() {
     }
   }, [geoQuery.data, location.lat, dispatch]);
 
-  // 3. Fetch precise weather using the robust Forecast endpoint, passing in Redux prefs
   const activeLat = location.lat || geoQuery.data?.location?.lat;
   const activeLon = location.lon || geoQuery.data?.location?.lon;
 
@@ -138,7 +126,6 @@ export function useWeatherData() {
   const error = forecastQuery.error || geoQuery.error;
   const isOffline = !!error && !!rawBaseData;
 
-  // 4. Force a re-render every minute to keep time-shifted data accurate when offline
   useEffect(() => {
     if (!isOffline) return;
     const interval = setInterval(() => {
@@ -147,26 +134,22 @@ export function useWeatherData() {
     return () => clearInterval(interval);
   }, [isOffline]);
 
-  // Apply offline interpolation to shift data to current time
   const baseData = isOffline ? shiftOfflineData(rawBaseData, now) : rawBaseData;
 
   return {
     location,
     units,
     lang,
-    // Provide a unified loading state (wait for browser GPS or fallback IP detection)
     isLoading:
       (!activeLat && !browserGeoFailed) ||
       (!activeLat && geoQuery.isLoading) ||
       forecastQuery.isLoading,
     error,
-    // Fall back to geoQuery data if forecast hasn't resolved yet
     data: baseData
       ? {
           ...baseData,
           location: {
             ...baseData.location,
-            // Inject the Redux location or fallback to geoQuery so the UI never sees "Unknown Location"
             city:
               location.city ||
               (geoQuery.data?.location as any)?.city ||

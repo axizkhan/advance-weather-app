@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   title: "WeatherAI | Advanced Immersive Telemetry Platform",
   description:
     "Real-time atmospheric analysis and situational environmental telemetry data.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

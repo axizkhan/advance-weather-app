@@ -4,9 +4,10 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 interface Props {
   data: any[];
+  isDaily?: boolean;
 }
 
-export function RainChart({ data }: Props) {
+export function RainChart({ data, isDaily }: Props) {
   return (
     <div className="h-72 w-full rounded-xl border border-[#13223f] bg-[#091225] p-5 shadow-sm">
       <ResponsiveContainer width="100%" height="100%">
@@ -24,6 +25,9 @@ export function RainChart({ data }: Props) {
             dy={10}
             tickFormatter={(value) => {
               if (!value) return "";
+              if (isDaily) {
+                return new Date(value).toLocaleDateString("en-US", { weekday: "short" });
+              }
               return new Date(value).toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
             }}
           />
@@ -52,6 +56,9 @@ export function RainChart({ data }: Props) {
             }}
             labelFormatter={(label) => {
               if (!label) return "";
+              if (isDaily) {
+                return new Date(label).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+              }
               return new Date(label).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
             }}
             formatter={(value: any) => [`${value}%`, "Precipitation"]}

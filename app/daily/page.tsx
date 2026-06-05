@@ -3,7 +3,7 @@
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { DailyPreview } from "@/components/weather/daily/DailyPreview";
 import { SunriseSunset } from "@/components/weather/daily/SunriseSunset";
-import { HumidityChart } from "@/components/weather/charts/HumidityChart";
+import { RainChart } from "@/components/weather/charts/RainChart";
 import { WeatherThemeWrapper } from "@/components/weather/shared/WeatherThemeWrapper";
 import { WeatherBackground } from "@/components/weather/shared/WeatherBackground";
 import { CentralizedErrorPage } from "@/components/shared/CentralizedErrorPage";
@@ -32,31 +32,11 @@ export default function DailyPage() {
   const weatherCode = data.current?.condition?.code;
   const currentDayMetrics = data.daily[0];
 
-  // Calculate daily average humidity from hourly data
-  const dailyHumidityData = data.daily.map((day: any, dayIndex: number) => {
-    const dayStart = new Date(day.date).getTime();
-    const dayEnd = dayStart + 24 * 60 * 60 * 1000;
-
-    // Filter hourly data for this day
-    const dayHourly = data.hourly?.filter((hour: any) => {
-      const hourTime = new Date(hour.time).getTime();
-      return hourTime >= dayStart && hourTime < dayEnd;
-    }) || [];
-
-    // Calculate average humidity for the day
-    const avgHumidity =
-      dayHourly.length > 0
-        ? Math.round(
-            dayHourly.reduce((sum: number, h: any) => sum + (h.humidity || 0), 0) /
-              dayHourly.length,
-          )
-        : 0;
-
-    return {
-      time: day.date,
-      humidity: avgHumidity,
-    };
-  });
+  // Map daily precipitation probability data
+  const dailyRainData = data.daily.map((day: any) => ({
+    time: day.date,
+    precipitationProbability: day.precipitationProbability || 0,
+  }));
 
   return (
     <WeatherThemeWrapper weatherCode={weatherCode}>
@@ -106,16 +86,16 @@ export default function DailyPage() {
             )}
           </div>
 
-          {/* Humidity Analytics Panel: 7-Day Average Trend Visualization */}
-          {dailyHumidityData.length > 0 && (
+          {/* Precipitation Analytics Panel: 7-Day Trend Visualization */}
+          {dailyRainData.length > 0 && (
             <section className="rounded-xl border border-[#13223f]/40 bg-[#091225]/20 p-5 backdrop-blur-sm">
               <div className="mb-5 flex items-center gap-2">
                 <span className="h-3 w-1 rounded-full bg-[#1bf8c3]" />
                 <h2 className="text-sm font-bold tracking-[0.06em] text-white uppercase">
-                  7-Day Humidity Trend
+                  7-Day Precipitation Trend
                 </h2>
               </div>
-              <HumidityChart data={dailyHumidityData} />
+              <RainChart data={dailyRainData} isDaily={true} />
             </section>
           )}
         </div>

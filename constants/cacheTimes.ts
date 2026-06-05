@@ -1,0 +1,9 @@
+export const CACHE_TIMES = {
+  CURRENT_WEATHER: 1000 * 60 * 10,
+
+  HOURLY_FORECAST: 1000 * 60 * 30,
+
+  DAILY_FORECAST: 1000 * 60 * 60 * 6,
+
+  GEO_LOCATION: 1000 * 60 * 60 * 24,
+};
